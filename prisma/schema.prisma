@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  doctor
+  patient
+}
+
+enum PrescriptionStatus {
+  pending
+  consumed
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role
+  createdAt DateTime @default(now())
+
+  doctor    Doctor?
+  patient   Patient?
+}
+
+model Doctor {
+  id            String @id @default(cuid())
+
+  userId        String @unique
+  user          User @relation(fields: [userId], references: [id])
+
+  specialty     String?
+
+  prescriptions Prescription[] @relation("AuthoredBy")
+}
+
+model Patient {
+  id            String @id @default(cuid())
+
+  userId        String @unique
+  user          User @relation(fields: [userId], references: [id])
+
+  birthDate     DateTime?
+
+  prescriptions Prescription[]
+}
+
+model Prescription {
+  id          String @id @default(cuid())
+
+  code        String @unique
+  status      PrescriptionStatus @default(pending)
+
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  consumedAt  DateTime?
+
+  patientId   String
+  patient     Patient @relation(fields: [patientId], references: [id])
+
+  authorId    String
+  author      Doctor @relation("AuthoredBy", fields: [authorId], references: [id])
+
+  items       PrescriptionItem[]
+
+  @@index([status, createdAt])
+  @@index([patientId])
+  @@index([authorId])
+}
+
+model PrescriptionItem {
+  id              String @id @default(cuid())
+
+  prescriptionId  String
+  prescription    Prescription @relation(fields: [prescriptionId], references: [id])
+
+  name            String
+  dosage          String?
+  quantity        Int?
+  instructions    String?
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  userId    String
+  userEmail String
+  details   String?
+  createdAt DateTime @default(now())
+}
