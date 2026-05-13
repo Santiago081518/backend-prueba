@@ -4,25 +4,29 @@
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-Backend robusto desarrollado como prueba técnica, enfocado en la seguridad, trazabilidad y automatización de procesos médicos.
+Backend robusto desarrollado como prueba técnica, enfocado en la **seguridad**, **trazabilidad** y **automatización** de procesos médicos. Permite a médicos emitir prescripciones digitales con validación QR, y a pacientes consultarlas y consumirlas de forma controlada.
 
 ---
 
-## 🚀 Características Principales
+## ✨ Características Principales
 
-- **Autenticación y Autorización:** Control de acceso basado en roles (**RBAC**) mediante JWT.
-- **Generación de PDF con QR:** Creación dinámica de prescripciones con código QR para validación de seguridad.
-- **Auditoría Completa:** Registro automático de acciones críticas en la base de datos para cumplimiento normativo.
-- **Métricas en Tiempo Real:** Dashboard de estadísticas para el perfil administrador.
-- **Seguridad:** Implementación de validaciones de propiedad de datos para garantizar la privacidad del paciente.
+| Característica            | Descripción                                                          |
+| ------------------------- | -------------------------------------------------------------------- |
+| 🔐 **Autenticación RBAC** | Control de acceso por roles (Admin, Médico, Paciente) mediante JWT   |
+| 📄 **PDF con QR**         | Generación dinámica de prescripciones con código QR para validación  |
+| 🗂️ **Auditoría**          | Registro automático de acciones críticas para cumplimiento normativo |
+| 📊 **Métricas**           | Dashboard de estadísticas en tiempo real para administradores        |
+| 🛡️ **Privacidad**         | Validaciones de propiedad de datos por paciente                      |
 
-## 🛠️ Tecnologías Utilizadas
+---
+
+## 🛠️ Stack Tecnológico
 
 - **Framework:** [NestJS](https://nestjs.com/)
 - **ORM:** [Prisma](https://www.prisma.io/)
-- **Base de Datos:** PostgreSQL
-- **Documentación:** PDFKit
-- **Seguridad:** Passport.js, JWT, Helmet, bcrypt
+- **Base de datos:** PostgreSQL
+- **Generación de PDF:** PDFKit
+- **Seguridad:** Passport.js · JWT · Helmet · bcrypt
 
 ---
 
@@ -34,58 +38,94 @@ src/
 ├── auth/           # Estrategias JWT y Guards de roles
 ├── common/         # Auditoría (AuditLog) y utilidades globales
 ├── prescriptions/  # Lógica central: creación, consumo y PDF
-├── prisma/         # Esquemas de base de datos y Seeds
-└── users/          # Perfiles de Médicos y Pacientes
+├── prisma/         # Esquemas y seeds de base de datos
+└── users/          # Perfiles de médicos y pacientes
+```
 
-🔧 Instalación y Configuración
-Clonar el repositorio e instalar dependencias:
+---
 
-Bash
+## 🚀 Instalación y Configuración
+
+### Prerrequisitos
+
+- Node.js >= 18
+- PostgreSQL en ejecución
+- npm
+
+### 1. Clonar e instalar dependencias
+
+```bash
+git clone <repo-url>
+cd <nombre-del-proyecto>
 npm install
-Configurar Variables de Entorno:
-Crea un archivo .env en la raíz con lo siguiente:
+```
 
-Fragmento de código
+### 2. Configurar variables de entorno
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB"
-JWT_SECRET="tu_secreto_super_seguro"
+JWT_SECRET="cambia_esto_por_un_secreto_seguro_en_produccion"
 PORT=3001
-Preparar la Base de Datos:
+```
 
-Bash
+> ⚠️ Nunca subas el archivo `.env` al repositorio. Asegúrate de que esté en `.gitignore`.
+
+### 3. Migrar y poblar la base de datos
+
+```bash
 npx prisma migrate dev
 npx prisma db seed
-Ejecutar en Desarrollo:
-
-Bash
-npm run start:dev
-
-
-👥 Usuarios de Prueba (Seed)
-
-Rol,Email,Password
-Administrador,admin@test.com,admin123
-Médico,dr@test.com,dr123456
-Paciente,patient@test.com,patient123456
-
-📁 Endpoints del API
-🔐 Autenticación
-POST /api/auth/login - Login y generación de JWT.
-
-GET /api/auth/profile - Ver información del usuario autenticado.
-
-📜 Prescripciones
-POST /api/prescriptions - Crear nueva receta (Médicos).
-
-GET /api/prescriptions/my-prescriptions - Listado personal (Pacientes).
-
-GET /api/prescriptions - Listado con paginación (Admin/Médico).
-
-GET /api/prescriptions/:id/pdf - Descarga de PDF con QR (Acceso Restringido).
-
-PUT /api/prescriptions/:id/consume - Marcar receta como usada (Pacientes).
-
-📊 Administración
-GET /api/admin/metrics - Estadísticas y conteos globales del sistema.
-
-Desarrollado con ❤️ para prueba técnica - 2026.
 ```
+
+### 4. Iniciar en modo desarrollo
+
+```bash
+npm run start:dev
+```
+
+La API estará disponible en `http://localhost:3001`.
+
+---
+
+## 👥 Usuarios de Prueba (Seed)
+
+| Rol           | Email            | Contraseña    |
+| ------------- | ---------------- | ------------- |
+| Administrador | admin@test.com   | admin123      |
+| Médico        | dr@test.com      | dr123456      |
+| Paciente      | patient@test.com | patient123456 |
+
+> ⚠️ Estas credenciales son solo para entorno de desarrollo.
+
+---
+
+## 📡 Endpoints del API
+
+### 🔐 Autenticación
+
+| Método | Endpoint            | Descripción                    | Acceso      |
+| ------ | ------------------- | ------------------------------ | ----------- |
+| `POST` | `/api/auth/login`   | Login y generación de JWT      | Público     |
+| `GET`  | `/api/auth/profile` | Perfil del usuario autenticado | Autenticado |
+
+### 📜 Prescripciones
+
+| Método | Endpoint                              | Descripción                    | Acceso         |
+| ------ | ------------------------------------- | ------------------------------ | -------------- |
+| `POST` | `/api/prescriptions`                  | Crear nueva prescripción       | Médico         |
+| `GET`  | `/api/prescriptions`                  | Listado con paginación         | Admin / Médico |
+| `GET`  | `/api/prescriptions/my-prescriptions` | Prescripciones propias         | Paciente       |
+| `GET`  | `/api/prescriptions/:id/pdf`          | Descargar PDF con QR           | Restringido    |
+| `PUT`  | `/api/prescriptions/:id/consume`      | Marcar prescripción como usada | Paciente       |
+
+### 📊 Administración
+
+| Método | Endpoint             | Descripción                       | Acceso |
+| ------ | -------------------- | --------------------------------- | ------ |
+| `GET`  | `/api/admin/metrics` | Estadísticas globales del sistema | Admin  |
+
+---
+
+_Desarrollado con ❤️ como prueba técnica — 2026_
