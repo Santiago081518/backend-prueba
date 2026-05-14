@@ -33,6 +33,20 @@ export class PrescriptionsController {
     private prisma: PrismaService,
   ) {}
 
+  @Get('public/verify/:id')
+  async publicVerify(@Param('id') id: string) {
+    const prescription = await this.prisma.prescription.findUnique({
+      where: { id },
+      include: {
+        items: true,
+        patient: { include: { user: { select: { name: true } } } },
+        author: { include: { user: { select: { name: true } } } },
+      },
+    });
+    if (!prescription) throw new NotFoundException();
+    return prescription;
+  }
+
   @Post()
   @Roles('doctor', 'admin')
   create(@Body() dto: CreatePrescriptionDto, @Req() req: any) {
@@ -84,19 +98,5 @@ export class PrescriptionsController {
   @Roles('patient')
   async consume(@Param('id') id: string, @Req() req: any) {
     return this.prescriptionsService.consume(id, req.user.sub);
-  }
-
-  @Get('public/verify/:id')
-  async publicVerify(@Param('id') id: string) {
-    const prescription = await this.prisma.prescription.findUnique({
-      where: { id },
-      include: {
-        items: true,
-        patient: { include: { user: { select: { name: true } } } },
-        author: { include: { user: { select: { name: true } } } },
-      },
-    });
-    if (!prescription) throw new NotFoundException();
-    return prescription;
   }
 }
