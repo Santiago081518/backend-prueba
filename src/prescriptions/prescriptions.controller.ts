@@ -24,6 +24,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('prescriptions')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -33,6 +34,7 @@ export class PrescriptionsController {
     private prisma: PrismaService,
   ) {}
 
+  @Public()
   @Get('public/verify/:id')
   async publicVerify(@Param('id') id: string) {
     const prescription = await this.prisma.prescription.findUnique({
