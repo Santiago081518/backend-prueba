@@ -126,7 +126,7 @@ export class PrescriptionsService {
       throw new ForbiddenException('No tienes permiso');
     }
 
-    const frontendUrl = 'https://frontend-prueba-taupe.vercel.app/api';
+    const frontendUrl = 'https://frontend-prueba-taupe.vercel.app';
     const qrData = `${frontendUrl}/verify/${prescription.id}`;
 
     // Generamos el QR con un poco más de calidad para que sea fácil de escanear
