@@ -1,3 +1,7 @@
+## 📖 Documentación de la API
+
+- **Swagger UI:** [https://backend-prueba-0g6r.onrender.com/docs](https://backend-prueba-0g6r.onrender.com/docs)
+
 # 🏥 Sistema de Gestión de Prescripciones Médicas
 
 ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
@@ -45,6 +49,8 @@ src/
 ---
 
 ## 🚀 Instalación y Configuración
+
+> 💡 **Nota sobre el rendimiento:** Debido al uso del plan gratuito de Render, la API puede entrar en estado de reposo tras 15 minutos de inactividad. La primera petición (o la validación QR) puede tardar entre 30 y 60 segundos en responder mientras el servidor se activa.
 
 ### Prerrequisitos
 
@@ -125,6 +131,10 @@ La API estará disponible en `http://localhost:3001`.
 | Método | Endpoint             | Descripción                       | Acceso |
 | ------ | -------------------- | --------------------------------- | ------ |
 | `GET`  | `/api/admin/metrics` | Estadísticas globales del sistema | Admin  |
+
+## 🛡️ Auditoría y Trazabilidad (Plus)
+
+El sistema registra automáticamente en la tabla `AuditLog` cualquier cambio de estado en las prescripciones (ej: cuando un paciente marca una receta como consumida), guardando el usuario, la acción y la fecha exacta.
 
 ---
 
