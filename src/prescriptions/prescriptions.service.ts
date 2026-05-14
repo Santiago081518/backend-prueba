@@ -126,8 +126,18 @@ export class PrescriptionsService {
       throw new ForbiddenException('No tienes permiso');
     }
 
-    const qrData = `Receta ID: ${prescription.id} - Código: ${prescription.code}`;
-    const qrCodeDataUrl = await QRCode.toDataURL(qrData);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const qrData = `${frontendUrl}/verify/${prescription.id}`;
+
+    // Generamos el QR con un poco más de calidad para que sea fácil de escanear
+    const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
+      margin: 2,
+      scale: 4,
+      color: {
+        dark: '#004a99', // Color azul oscuro para que haga juego con el PDF
+        light: '#ffffff',
+      },
+    });
 
     await this.auditService.log(
       'DOWNLOAD_PDF',
@@ -143,10 +153,8 @@ export class PrescriptionsService {
       doc.on('data', (chunk) => chunks.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
 
-      // Encabezado
       doc.fontSize(20).text('PRESCRIPCIÓN MÉDICA', { align: 'center' });
 
-      // --- NUEVO: Insertar el QR en la esquina superior derecha ---
       doc.image(qrCodeDataUrl, 430, 20, { width: 100 });
 
       doc.moveDown();
@@ -156,18 +164,15 @@ export class PrescriptionsService {
       doc.text(`Fecha: ${prescription.createdAt.toLocaleDateString()}`);
       doc.moveDown();
 
-      // Información del Médico y Paciente
       doc.fontSize(12).text(`Médico: ${prescription.author.user.name}`);
       doc.text(`Especialidad: ${prescription.author.specialty || 'General'}`);
       doc.moveDown(0.5);
       doc.text(`Paciente: ${prescription.patient.user.name}`);
       doc.moveDown();
 
-      // Línea divisoria
-      doc.rect(50, doc.y, 500, 2).fill('#004a99'); // Un color azul más médico
+      doc.rect(50, doc.y, 500, 2).fill('#004a99');
       doc.moveDown();
 
-      // Medicamentos
       doc
         .fillColor('#000')
         .fontSize(14)
@@ -183,7 +188,6 @@ export class PrescriptionsService {
         doc.moveDown(0.5);
       });
 
-      // Pie de página de seguridad
       doc
         .fontSize(8)
         .fillColor('#777')
@@ -204,13 +208,25 @@ export class PrescriptionsService {
         id,
         patient: { userId },
       },
+      include: {
+        patient: {
+          include: { user: true },
+        },
+      },
     });
 
-    if (!prescription) {
-      throw new NotFoundException(
-        'Prescripción no encontrada o no pertenece al usuario',
-      );
+    if (!prescription || !prescription.patient.user) {
+      throw new NotFoundException('Prescripción o usuario no encontrado');
     }
+
+    const userEmail = prescription.patient.user.email;
+
+    await this.auditService.log(
+      'MARK_AS_CONSUMED',
+      userId,
+      userEmail,
+      `Receta ID: ${id} marcada como consumida`,
+    );
 
     return this.prisma.prescription.update({
       where: { id },

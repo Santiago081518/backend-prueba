@@ -8,7 +8,6 @@ async function main() {
   const drPassword = await bcrypt.hash('dr123456', 10);
   const patientPassword = await bcrypt.hash('patient123456', 10);
 
-  // 1. Crear Admin
   await prisma.user.upsert({
     where: { email: 'admin@test.com' },
     update: {},
@@ -20,7 +19,6 @@ async function main() {
     },
   });
 
-  // 2. Crear Médico (User + Perfil Doctor)
   const doctorUser = await prisma.user.upsert({
     where: { email: 'dr@test.com' },
     update: {},
@@ -36,7 +34,6 @@ async function main() {
     include: { doctor: true },
   });
 
-  // 3. Crear Paciente (User + Perfil Patient)
   const patientUser = await prisma.user.upsert({
     where: { email: 'patient@test.com' },
     update: {},
@@ -52,14 +49,13 @@ async function main() {
     include: { patient: true },
   });
 
-  // 4. Crear Prescripciones de ejemplo
   if (doctorUser.doctor && patientUser.patient) {
     await prisma.prescription.create({
       data: {
         code: 'RX-12345',
         status: PrescriptionStatus.pending,
         notes: 'Tomar con abundante agua.',
-        authorId: doctorUser.doctor.id, // ID del perfil Doctor, no del User
+        authorId: doctorUser.doctor.id,
         patientId: patientUser.patient.id,
         items: {
           create: [

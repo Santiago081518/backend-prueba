@@ -10,7 +10,7 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get('metrics')
-  @Roles('admin') // Solo el administrador [cite: 36, 212]
+  @Roles('admin')
   async getMetrics() {
     return this.adminService.getMetrics();
   }

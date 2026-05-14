@@ -10,16 +10,36 @@ export class UsersController {
   constructor(private prisma: PrismaService) {}
 
   @Get()
-  @Roles('doctor', 'admin') // Los médicos necesitan ver a los pacientes para recetar
+  @Roles('doctor', 'admin')
   async findAll() {
-    return this.prisma.patient.findMany({
+    const patients = await this.prisma.patient.findMany({
       include: {
         user: {
           select: {
+            id: true,
             name: true,
             email: true,
           },
         },
+      },
+    });
+
+    return patients.map((p) => ({
+      id: p.id,
+      name: p.user.name,
+      email: p.user.email,
+    }));
+  }
+
+  @Get('all')
+  @Roles('admin')
+  async findAllUsers() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
       },
     });
   }

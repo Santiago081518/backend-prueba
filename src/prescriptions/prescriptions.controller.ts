@@ -9,6 +9,7 @@ import {
   UseGuards,
   Put,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 
 import type { Response } from 'express';
@@ -22,11 +23,15 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Controller('prescriptions')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class PrescriptionsController {
-  constructor(private prescriptionsService: PrescriptionsService) {}
+  constructor(
+    private prescriptionsService: PrescriptionsService,
+    private prisma: PrismaService,
+  ) {}
 
   @Post()
   @Roles('doctor', 'admin')
@@ -79,5 +84,19 @@ export class PrescriptionsController {
   @Roles('patient')
   async consume(@Param('id') id: string, @Req() req: any) {
     return this.prescriptionsService.consume(id, req.user.sub);
+  }
+
+  @Get('public/verify/:id')
+  async publicVerify(@Param('id') id: string) {
+    const prescription = await this.prisma.prescription.findUnique({
+      where: { id },
+      include: {
+        items: true,
+        patient: { include: { user: { select: { name: true } } } },
+        author: { include: { user: { select: { name: true } } } },
+      },
+    });
+    if (!prescription) throw new NotFoundException();
+    return prescription;
   }
 }

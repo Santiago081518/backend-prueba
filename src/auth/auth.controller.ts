@@ -11,6 +11,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 
 import { Roles } from '../common/decorators/roles.decorator';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -26,5 +27,12 @@ export class AuthController {
   @Roles('admin')
   getProfile(@Req() req: any) {
     return req.user;
+  }
+
+  @Post('register')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 }
