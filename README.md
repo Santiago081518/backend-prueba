@@ -73,6 +73,9 @@ Crea un archivo `.env` en la raíz del proyecto:
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB"
 JWT_SECRET="cambia_esto_por_un_secreto_seguro_en_produccion"
+JWT_ACCESS_SECRET="cambia_esto_por_un_secreto_seguro_en_produccion"
+JWT_ACCESS_TTL=15m
+JWT_REFRESH_TTL=7d
 PORT=3001
 ```
 
